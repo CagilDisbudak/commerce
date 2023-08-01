@@ -1,5 +1,6 @@
 package com.e_commerce_project.commerce.config;
 
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,9 +31,9 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(configurer ->
                 configurer
                         .requestMatchers("/dashboard").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/register").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/index","/register","get_person").permitAll().anyRequest().authenticated()
-
+                        .requestMatchers(HttpMethod.POST,"api/v1/person/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "api/v1/person/index","api/v1/person/register","api/v1/person/getPerson").permitAll().anyRequest().authenticated()
+                        .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll().anyRequest().authenticated()
         );
 
         httpSecurity // Login Page
