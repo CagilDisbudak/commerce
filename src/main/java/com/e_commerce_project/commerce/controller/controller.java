@@ -2,6 +2,7 @@ package com.e_commerce_project.commerce.controller;
 import com.e_commerce_project.commerce.model.Person;
 import com.e_commerce_project.commerce.repository.PersonRepository;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,19 +40,24 @@ public class controller {
     @DeleteMapping("/{id}")
     public void deletePeople(@PathVariable UUID id ){personRepository.deleteById(id);}
 
-    @PostMapping("/updatePerson")
-    public void updatePerson(@RequestBody Person person){
+    @PatchMapping("/updatePerson")
+    public Person updatePartPerson(@RequestBody Person person){
         Person existingPerson = personRepository.findById(person.id).orElse(null);
-            if(person.name != null){
-                existingPerson.setName(person.name);
-            }
-            if(person.password != null){
-                existingPerson.setPassword(person.password);
-            }
-            if (existingPerson != null)
+            if (existingPerson != null){
+                if(person.name != null){
+                    existingPerson.setName(person.name);
+                }
+                if(person.password != null){
+                    existingPerson.setPassword(person.password);
+                }
                 personRepository.save(existingPerson);
+            }
+        return person;
     }
-
+    @PostMapping("/updatePerson")
+    public void updatePerson(@Valid @RequestBody Person person){
+        personRepository.findById(person.id).ifPresent(personRepository::save);
+    }
 
 }
 
