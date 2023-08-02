@@ -1,9 +1,14 @@
 package com.e_commerce_project.commerce.controller;
+import com.e_commerce_project.commerce.error.PersonErrorResponse;
+import com.e_commerce_project.commerce.error.PersonNotFoundException;
 import com.e_commerce_project.commerce.model.Person;
 import com.e_commerce_project.commerce.repository.PersonRepository;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +46,7 @@ public class controller {
     public void deletePeople(@PathVariable UUID id ){personRepository.deleteById(id);}
 
     @PatchMapping("/updatePerson")
-    public Person updatePartPerson(@RequestBody Person person){
+    public void updatePartPerson(@RequestBody Person person){
         Person existingPerson = personRepository.findById(person.id).orElse(null);
             if (existingPerson != null){
                 if(person.name != null){
@@ -52,11 +57,25 @@ public class controller {
                 }
                 personRepository.save(existingPerson);
             }
-        return person;
+            else throw new PersonNotFoundException("Person can not found! " + person.id);
+
     }
     @PostMapping("/updatePerson")
     public void updatePerson(@Valid @RequestBody Person person){
-        personRepository.findById(person.id).ifPresent(personRepository::save);
+        Person existingPerson = personRepository.findById(person.id).orElse(null);
+        if (existingPerson != null){
+            personRepository.save(existingPerson);
+        }
+        else throw new PersonNotFoundException("Person can not found! " + person.id);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<PersonErrorResponse> handleException(PersonNotFoundException exc){
+        PersonErrorResponse error = new PersonErrorResponse();
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        error.setMassage(exc.getMessage());
+        error.setTimeStamp(System.currentTimeMillis());
+        return new ResponseEntity<>(error,HttpStatus.NOT_FOUND);
     }
 
 }
