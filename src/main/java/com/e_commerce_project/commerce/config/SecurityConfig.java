@@ -23,7 +23,13 @@ public class SecurityConfig {
                 .password("{noop}admin")
                 .roles("ADMIN")
                 .build();
-        return new InMemoryUserDetailsManager(superAdmin);
+        UserDetails defUser = User
+                .builder()
+                .username("cagil")
+                .password("{noop}cagil")
+                .roles("defUser")
+                .build();
+        return new InMemoryUserDetailsManager(superAdmin, defUser);
     }
 
     @Bean
@@ -33,9 +39,6 @@ public class SecurityConfig {
                         .requestMatchers("/dashboard").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST,"api/v1/person/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "api/v1/person/index","api/v1/person/register","api/v1/person/getPerson").permitAll().anyRequest().authenticated()
-/*
-                        .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll().anyRequest().authenticated()
-*/
         );
 
         httpSecurity // Login Page
